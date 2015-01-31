@@ -1,26 +1,14 @@
 #!/bin/bash
 #
-# Usage: okuyama 
 
-usage() {
-  echo "usage: okuyama <config_file> {start|stop}"
-  exit 1
-}
-
-if [ $# -ne 2 ]; then
-  usage
-fi
-
-readonly JOB_CONF_FILE=$1 
-if [ ! -s $JOB_CONF_FILE ]; then 
-  echo "error: config_file is not a normal file"
-  exit 1
-fi
+# JOB_CONF_FILE is a file of Okuyama Node definition
+readonly JOB_CONF_FILE="/home/okuyama/conf/DataNode.properties"
 
 ## DEFAULT SETTINGS
-readonly DEFAULT_OKUYAMA_HOME="/opt/okuyama"
+readonly DEFAULT_OKUYAMA_HOME="/home/okuyama"
 readonly DEFAULT_MEM_OPTS="-Xmx216m -Xms128m -Xmn64m"
 readonly DEFAULT_GC_OPTS="-XX:+UseConcMarkSweepGC -XX:+CMSParallelRemarkEnabled -XX:+UseParNewGC -XX:TargetSurvivorRatio=98 -XX:MaxTenuringThreshold=32"
+readonly DEFAULT_OKUYAMA_OPTS="-vidf true -svic 2"
 
 trap "stop; exit" TERM INT
 
@@ -28,6 +16,7 @@ start() {
 	OKUYAMA_HOME=${OKUYAMA_HOME:=$DEFAULT_OKUYAMA_HOME}
 	MEM_OPTS=${MEM_OPTS:=$DEFAULT_MEM_OPTS}
 	GC_OPTS=${GC_OPTS:=$DEFAULT_GC_OPTS}
+	OKUYAMA_OPTS=${OKUYAMA_OPTS:$DEFAULT_OKUYAMA_OPTS}
 
 	readonly BATCH_CONF_FILE=${OKUYAMA_HOME}/conf/Main.properties
 
@@ -41,9 +30,8 @@ start() {
 	#DEBUG_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n"
 
 	JAVA_OPTS="-server -cp $CLASSPATH $MEM_OPTS $GC_OPTS $DEBUG_OPTS -Djava.net.preferIPv4Stack=true"
-	OKUYAMA_OPTS="$BATCH_CONF_FILE $JOB_CONF_FILE -vidf true -svic 2"
 
-	java -DMARK=$JOB_CONF_FILE $JAVA_OPTS okuyama.base.JavaMain $OKUYAMA_OPTS &
+	java -DMARK=$JOB_CONF_FILE $JAVA_OPTS okuyama.base.JavaMain $BATCH_CONF_FILE $JOB_CONF_FILE $OKUYAMA_OPTS &
 	# > ${OKUYAMA_HOME}/logs/console.log 2>&1 	
 
 	# Run as non-demonize, but be able to gracefully shutdown by SIGTERM
@@ -79,13 +67,4 @@ stop() {
 	}
 }
 
-case "$2" in
-start)
-    start
-	;;
-stop)
-	stop
-	;;
-*)
-	usage
-esac
+start
