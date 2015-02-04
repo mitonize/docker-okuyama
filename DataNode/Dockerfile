@@ -29,7 +29,7 @@ RUN \
 # 
 USER okuyama
 WORKDIR ${OKUYAMA_HOME}
-RUN sed -i "s%/home/okuyama/okuyama/%/home/okuyama/%g" log4j.properties
+COPY log4j.properties /home/okuyama/log4j.properties
 COPY DataNode.properties /home/okuyama/conf/DataNode.properties
 COPY docker-entrypoint.sh /entrypoint.sh
 
