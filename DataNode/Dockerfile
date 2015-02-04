@@ -34,6 +34,7 @@ COPY DataNode.properties /home/okuyama/conf/DataNode.properties
 COPY docker-entrypoint.sh /entrypoint.sh
 
 VOLUME ${OKUYAMA_HOME}/logs
+VOLUME ${OKUYAMA_HOME}/keymapfile
 EXPOSE 5553
 EXPOSE 15553
 

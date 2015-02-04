@@ -11,7 +11,7 @@ docker run -d -P -e "TZ=Asia/Tokyo" -v $(pwd)/logs:/home/okuyama/logs -v $(pwd)/
 
 マスターノードの起動
 ```
-docker run -d -p 8888:8888 --link okuyama-datanode:okuyama-datanode -e "TZ=Asia/Tokyo" -v $(pwd)/logs-master:/home/pokuyama/logs --name okuyama-masternode mitonize/okuyama-masternode:0.9.6.1 
+docker run -d -p 8888:8888 --link okuyama-datanode:okuyama-datanode -e "TZ=Asia/Tokyo" -v $(pwd)/logs-master:/home/okuyama/logs --name okuyama-masternode mitonize/okuyama-masternode:0.9.6.1 
 ```
 
 ## Custom configuration
