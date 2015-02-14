@@ -7,12 +7,13 @@ readonly JOB_CONF_FILE="/home/okuyama/conf/MasterNode.properties"
 ##
 # Make dataNode array and update properties
 #
-readonly DATANODE_NAMES=$(env | grep -E "OKUYAMA_DATANODE[0-9]*_PORT_5553_TCP=" | cut -d= -f1 | sort)
+readonly DATANODE_NAMES=$(env | grep -E "^OKUYAMA_DATANODE(_[0-9]+)?_PORT_5553_TCP=" | cut -d= -f1 | sort | uniq)
 if [ -z "$DATANODE_NAMES" ]; then
-	echo >&2 'error: missing OKUYAMA_DATANODE<num>_PORT_5553_TCP environment variable'
-	echo >&2 '  Did you forget to --link some_okuyama-datanode_container:okuyama-datanode1 and so on?'
+	echo >&2 'error: missing OKUYAMA_DATANODE_<num>_PORT_5553_TCP environment variable'
+	echo >&2 '  Did you forget to --link some_okuyama-datanode_container:okuyama-datanode_1 and so on?'
 	exit 1
 fi
+echo $DATANODE_NAMES
 
 DATANODE_ARRAY=""
 DATANODE_COUNT=0
@@ -30,7 +31,7 @@ sed -i "s/^KeyMapNodesInfo=.*/KeyMapNodesInfo=$DATANODE_ARRAY/" $JOB_CONF_FILE
 ##
 # Make dataNode mirror array and update properties
 #
-readonly DATANODE_MIRROR_NAMES=$(env | grep -E "OKUYAMA_DATANODE_MIRROR[0-9]*_PORT_5553_TCP=" | cut -d= -f1 | sort)
+readonly DATANODE_MIRROR_NAMES=$(env | grep -E "^OKUYAMA_DATANODE_MIRROR(_[0-9]+)?_PORT_5553_TCP=" | cut -d= -f1 | sort | uniq)
 if [ -n "$DATANODE_MIRROR_NAMES" ]; then
   ## Make dataNode array and update properties
   DATANODE_MIRROR_ARRAY=""
@@ -56,15 +57,13 @@ fi
 readonly DEFAULT_OKUYAMA_HOME="/home/okuyama"
 readonly DEFAULT_MEM_OPTS="-Xmx216m -Xms128m -Xmn64m"
 readonly DEFAULT_GC_OPTS="-XX:+UseConcMarkSweepGC -XX:+CMSParallelRemarkEnabled -XX:+UseParNewGC -XX:TargetSurvivorRatio=98 -XX:MaxTenuringThreshold=32"
-readonly DEFAULT_OKUYAMA_OPTS="-vidf true -svic 2"
 
 trap "stop; exit" TERM INT
 
 start() {
-	OKUYAMA_HOME=${OKUYAMA_HOME:=$DEFAULT_OKUYAMA_HOME}
-	MEM_OPTS=${MEM_OPTS:=$DEFAULT_MEM_OPTS}
-	GC_OPTS=${GC_OPTS:=$DEFAULT_GC_OPTS}
-	OKUYAMA_OPTS=${OKUYAMA_OPTS:$DEFAULT_OKUYAMA_OPTS}
+	OKUYAMA_HOME="${OKUYAMA_HOME:=$DEFAULT_OKUYAMA_HOME}"
+	MEM_OPTS="${MEM_OPTS:=$DEFAULT_MEM_OPTS}"
+	GC_OPTS="${GC_OPTS:=$DEFAULT_GC_OPTS}"
 
 	readonly BATCH_CONF_FILE=${OKUYAMA_HOME}/conf/Main.properties
 
@@ -76,11 +75,11 @@ start() {
 	CLASSPATH=$OKUYAMA_JAR:`echo $(ls ${OKUYAMA_HOME}/lib/*.jar) | sed -e 's/ /:/g'`
 
 	#DEBUG_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n"
-
 	JAVA_OPTS="-server -cp $CLASSPATH $MEM_OPTS $GC_OPTS $DEBUG_OPTS -Djava.net.preferIPv4Stack=true"
 
+	set -x
 	java -DMARK=$JOB_CONF_FILE $JAVA_OPTS okuyama.base.JavaMain $BATCH_CONF_FILE $JOB_CONF_FILE $OKUYAMA_OPTS &
-	# > ${OKUYAMA_HOME}/logs/console.log 2>&1 	
+	set +x
 
 	# Run as non-demonize, but be able to gracefully shutdown by SIGTERM
 	#  see http://veithen.github.io/2014/11/16/sigterm-propagation.html
