@@ -1,0 +1,161 @@
+masternode: 
+  build: MasterNode
+  ports:
+    - "8888:8888"
+  links: 
+    - datanode:okuyama-datanode
+  environment:
+    OKUYAMA_OPTS: 
+    GC_OPTS:
+    MEM_OPTS:
+datanode:
+  build: DataNode
+  environment:
+#    OKUYAMA_OPTS: -efsmo false -svic 20
+    OKUYAMA_OPTS: -svic 20
+    GC_OPTS:
+    MEM_OPTS:
+
+###################################################################
+# -debug
+# -c [sec] 
+#       MasterNodeコネクション無操作タイムアウト時間(単位は秒). デフォルト:43200 (12時間)
+#
+# -KS [byte] saveKeyMaxSize
+#       Key,Tagの最大長(base64エンコード後).　200未満が指定されたら200に設定される. デフォルト:468
+#
+###################################################################
+#  MasterNode
+#
+# -v [count] consistentHashVirtualNode
+#       分散アルゴリズムにConsistentHashを使用した場合の仮想ノードの数. デフォルト:50
+#
+# -ncot [msec] nodeConnectionOpenTimeout
+#       Node間のコネクションオープンタイムアウト時間(ミリ秒). デフォルト:5000
+#
+# -nct  [msec] nodeConnectionTimeout
+#       Node間のコネクションReadタイムアウト時間(ミリ秒). デフォルト:10000
+#
+# -mmgrs [byte] maxMultiGetRequestSize
+#       getMultiValueの際に一度にDataNodeに問い合わせるRequestKeyの数
+#       多きくし過ぎると一度に大量のValueがメモリを占有するので注意. デフォルト:50
+#
+# -sidc [n] searchIndexDistributedCount
+#       検索Indexを1箇所のDataNodeに集中させないために同じIndex値であっても分散させる係数. デフォルト:2
+#
+# -gaetu [true] getAndExpireTimeUpdate
+#       データ取得時にデータの有効期限をUpdateするかの指定(未実装). デフォルト:false
+#
+# -crcm [true] compulsionRetryConnectMode
+#          MasterNode -> DataNode間の通信が失敗した際に強制的に再接続を行う設定. デフォルト:false
+#
+# -dcmuc [n] datanodeConnectorMaxUseCount
+#          MasterNodeとDataNode間のコネクションを強制的に切断するまでの閾値. デフォルト:50000
+#
+# -scmn [true] slaveClusterMasterNode
+#          MasterNodeをマルチクラスターのスレーブで起動する場合にtrueを指定する. デフォルト:false
+#
+# -rocm [true] rebuildOkuyamaClusterMode
+#          MasterNodeをマルチクラスターで起動した場合にメインとなるクラスターがダウンし、
+#          Slaveからリビルドする場合にtrueとして起動する. デフォルト:false
+#
+# -npmmns [true] notPromotionMainMasterNodeStatus
+#          MainMasterNodeに昇格しないMasterNodeを作る際にtrueとする。
+#          リカバリーを実際に実行せずに成功したものとして処理をスキップする。
+#️          MasterNodeの中でもデータ復旧を行うMasterNodeを限定したい場合に使う
+#          例えばスプリットブレインなどの現象でMasterNode同士が通信出来なくなった際に、それぞれの
+#          MasterNodeが勝手に復旧をしないためなどである。デフォルト:false
+#
+# -smnca [address] solitaryMasterNodeCheckAddress
+#          MasterNodeの孤立チェック用の到達確認先のアドレス文字列。icmpでの確認のため、確認先のアドレスのみをカンマ区切りで設定する。
+#          全てのアドレスに届かない場合に自動的にMasterNodeがshutdownする.
+#          無指定の場合は孤立判定しない. デフォルト:未指定
+#
+############################################################################### 
+#  DataNode
+#
+# -ts [byte] tagValueAppendMaxSize
+#       TagのValueの1つ当たりの長さ(Keyの連結結果長). デフォルト:24576 (24k)
+#
+# -S [byte] saveDataMaxSize
+#       保存出来る、Key、Tag、Valueの最大長. Valueの最大長(base64エンコード前)
+#       デフォルト:1572864
+#
+# -s [byte] dataFileWriteMaxSize
+#       共通のデータファイルに書き出す最大サイズ. デフォルト:12888
+#
+# -rr [true] recoverRequired
+#          DataNodeがリカバリが必要な状態であることを明示して起動する. デフォルト:false
+#
+# -lsdn [true] lowSpecDataNode
+#          DataNodeがLowSpecのサーバで稼働しているもしくはディスクが遅い、リカバリorノード追加時の
+#          負荷を下げたい場合にtrueとする. デフォルト:false
+#
+# -lsdnsdc [n] lowSpecDataNodeSendDataCount
+#          DataNodeがリカバリ時、ノード追加時にデータを一度に転送する上限数を制御する. デフォルト:2000
+#
+# -pcmf [true] pageCacheMappendFlg
+#          データファイルをOSのPageCacheにのせる要否. デフォルト:false
+#
+# -pcms [n] pageCacheMappendSize
+#          データファイルをOSのPageCacheにのせる件数. デフォルト:100000
+#
+# -udt [n] useDiskType
+#          okuyamaが利用するディスクの種類 1=HDD,2=SSD  デフォルト:1 
+#
+# -mdcs [n] maxDiskCacheSize
+#          高速なDiskを読み出しキャッシュに利用する場合の最大キャッシュ数
+#          (ここでの定義数 × dataFileWriteMaxSize=ディスク上に作成される最大サイズ(バイト/単位)). 
+#          デフォルト:10000
+#
+# -fbmnk [n] fileBaseMapNumberOfOneFileKey
+#       FileBaseDataMapで1KeyファイルにどれだけのKey値を保存するかの指定.
+#       少なければKeyの特定が高速になるので、1つのKey-Valueへのアクセスは高速化するが
+#       同時アクセスが複数のKeyに発生した場合ディスク全体にかかる負荷は高くなる.
+#       SSDなどランダムReadが高速なディスクの場合は高めに調整すると高速になる可能性が高い
+#       起動引数の"-fbmnk"で調整可能. デフォルト:7000
+#
+# -wfsrf [false] workFileStartingReadFlg
+#          操作記録ログ(WALログ)を読み込む設定. デフォルト:true
+#
+# -dfssf [true] dataFileSequentialSchedulingFlg
+#          データファイルへのシークアクセスをSequentialになるように調整する設定. デフォルト:false
+#
+# -efsmo [false] executeFileStoreMapObject
+#          メモリ上のデータをバックアップファイルに保存しない場合はfalseにする. デフォルト:true
+#
+# -smbsmf [n] serializeMapBucketSizeMemoryFactor
+#          SerializeMapのBucketサイズのJVMへのメモリ割当1MB単位への格納係数
+#          小さな値にすればBucket数は減る. デフォルト:400
+#
+# -red [false] recycleExsistData
+#          完全ファイルモード時に既に存在するデータを再利用する. デフォルト:true
+#
+# -tlft [n] transactionLogFsyncType
+#        WALログのファイルシステムへのfsync係数
+#        0=OSでの自動sync制御、1=fsync回数低、2=fsync回数中、3=fsync回数高、4=常にfsync
+#        デフォルト:0
+#
+# -vidf [true|false] vacuumInvalidDataFlg
+#        有効期限切れデータバキューム実行指定. デフォルト:true
+#
+# -svic [n] startVaccumInvalidCount
+#        有効期限切れデータ削除チェックサイクル(単位:分). デフォルト:29
+#
+# -csf [true|false] calcSizeFlg
+#        保存データサイズの合計値演算設定 true:計算する  false:計算しない
+#        デフォルト:true
+# 
+# -rdvp [true|false] reuseDataFileValuePositionFlg
+#         完全ファイルモード時に既に登録されているKeyの更新の場合にファイル上のValueの場所を再利用するかの設定。
+#         再利用しない場合は、新規、更新ともに処理速度を向上させることが可能。正し同一のKeyを書き換え続けた場合に
+#         Valueを格納しているデータファイルが肥大し続ける。ただし、定期的にVacuum処理で回収はされる。
+#         true=再利用する、false=再利用しない. デフォルト:true
+#
+# -dwmqs [n] delayWriteMaxQueueingSize
+#          DelayWriteCoreFileBaseKeyMapがディスクに書きだすデータをどれだけメモリにキューイング
+#          するかのレコード数. デフォルト:8000
+#
+# -fa [count] parallelDiskAccess
+#       ファイルシステムへの同時アクセス係数. デフォルト:49
+#
