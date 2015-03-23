@@ -13,6 +13,7 @@
 #
 #%# family=manual
 
+HOST=localhost
 PORT=$(basename $0 | sed 's/^okuyama_datanode_//g')
 
 RETVAL=0
