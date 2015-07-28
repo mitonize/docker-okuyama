@@ -10,6 +10,8 @@ masternode:
     MEM_OPTS:
 datanode:
   build: DataNode
+  ports:
+    - "5553:5553"
   environment:
 #    OKUYAMA_OPTS: -efsmo false -svic 20
     OKUYAMA_OPTS: -svic 20
