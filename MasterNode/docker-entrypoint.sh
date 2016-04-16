@@ -56,7 +56,7 @@ fi
 ## DEFAULT SETTINGS
 readonly DEFAULT_OKUYAMA_HOME="/home/okuyama"
 readonly DEFAULT_MEM_OPTS="-Xmx216m -Xms128m -Xmn64m"
-readonly DEFAULT_GC_OPTS="-XX:+UseConcMarkSweepGC -XX:+CMSParallelRemarkEnabled -XX:+UseParNewGC -XX:TargetSurvivorRatio=98 -XX:MaxTenuringThreshold=32"
+readonly DEFAULT_GC_OPTS="-XX:+UseConcMarkSweepGC -XX:+CMSParallelRemarkEnabled -XX:+UseParNewGC -XX:TargetSurvivorRatio=98 -XX:MaxTenuringThreshold=15"
 
 trap "stop; exit" TERM INT
 

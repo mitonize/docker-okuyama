@@ -1,32 +1,34 @@
-FROM centos:centos7
+FROM alpine:3.3
 
-MAINTAINER Mitsutaka WATANABE 
+MAINTAINER Mitsutaka WATANABE
 
-RUN yum install java-1.7.0-openjdk-headless -y
+# Install cURL
+RUN apk --update add bash curl ca-certificates openjdk8-jre tar
 
-ENV OKUYAMA_VERSION 0.9.6.1
+#&& \
+#            curl -Ls https://circle-artifacts.com/gh/andyshinn/alpine-pkg-glibc/6/artifacts/0/home/ubuntu/alpine-pkg-glibc/packages/x86_64/glibc-2.21-r2.apk > /tmp/glibc-2.21-r2.apk && \
+#                apk add --allow-untrusted /tmp/glibc-2.21-r2.apk
+
+ENV OKUYAMA_VERSION 0.9.6.3
 
 ENV OKUYAMA_HOME /home/okuyama
 # create user
-RUN adduser okuyama
+RUN adduser -D okuyama
 
-# 
+#
 WORKDIR ${OKUYAMA_HOME}
 
 # retreive sources of okuyama
 RUN \
-  yum install tar -y \
-  && echo downloading $OKUYAMA_VERSION.tar.gz \
-  && curl -OL https://github.com/kobedigitallabo/okuyama/archive/$OKUYAMA_VERSION.tar.gz \ 
+  echo downloading $OKUYAMA_VERSION.tar.gz \
+  && curl -OL https://github.com/kobedigitallabo/okuyama/archive/$OKUYAMA_VERSION.tar.gz \
   && tar zxf $OKUYAMA_VERSION.tar.gz \
   && cp -a okuyama-$OKUYAMA_VERSION/install/* ${OKUYAMA_HOME} \
-  && rm -rf okuyama-$OKUYAMA_VERSION \
+  && rm -rf okuyama-$OKUYAMA_VERSION $OKUYAMA_VERSION.tar.gz \
   && mkdir ${OKUYAMA_HOME}/logs \
-  && chown -R okuyama:okuyama $OKUYAMA_HOME \
-  && yum erase tar -y\
-  && yum clean all
+  && chown -R okuyama:okuyama $OKUYAMA_HOME
 
-# 
+#
 USER okuyama
 WORKDIR ${OKUYAMA_HOME}
 COPY log4j.properties /home/okuyama/log4j.properties
