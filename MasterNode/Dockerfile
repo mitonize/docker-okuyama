@@ -2,9 +2,9 @@ FROM centos:centos7
 
 MAINTAINER Mitsutaka WATANABE 
 
-RUN yum install java-1.7.0-openjdk-headless -y
+RUN yum install java-1.8.0-openjdk-headless -y
 
-ENV OKUYAMA_VERSION 0.9.6.1
+ENV OKUYAMA_VERSION 0.9.6.3
 
 ENV OKUYAMA_HOME /home/okuyama
 # create user
