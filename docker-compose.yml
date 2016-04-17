@@ -1,26 +1,38 @@
-masternode: 
-  build: MasterNode
-  ports:
-    - "8888:8888"
-  links: 
-    - datanode:okuyama-datanode
-  environment:
-    OKUYAMA_OPTS: 
-    GC_OPTS:
-    MEM_OPTS:
-datanode:
-  build: DataNode
-  ports:
-    - "5553:5553"
-  environment:
-#    OKUYAMA_OPTS: -efsmo false -svic 20
-    OKUYAMA_OPTS: -svic 20
-    GC_OPTS:
-    MEM_OPTS:
+version: '2'
+services:
+  masternode:
+    build: ./MasterNode
+    image: "okuyama-masternode:0.9.6.3"
+    ports:
+      - "8888:8888"
+    links:
+      - datanode1
+#     - datanode2
+    environment:
+      - OKUYAMA_DATANODE_1_PORT_5553_TCP=tcp://datanode1:5553
+#     - OKUYAMA_DATANODE_2_PORT_5553_TCP=tcp://datanode2:5553
+      - OKUYAMA_OPTS=
+      - GC_OPTS=
+      - MEM_OPTS=
+  datanode1:
+    build: ./DataNode
+    image: "okuyama-datanode:0.9.6.3"
+    environment:
+#     OKUYAMA_OPTS: -efsmo false -svic 20
+      OKUYAMA_OPTS: -svic 20
+      GC_OPTS:
+      MEM_OPTS:
+# datanode2:
+#   build: ./DataNode
+#   image: "okuyama-datanode:0.9.6.3"
+#   environment:
+#     OKUYAMA_OPTS: -svic 20
+#     GC_OPTS:
+#     MEM_OPTS:
 
 ###################################################################
 # -debug
-# -c [sec] 
+# -c [sec]
 #       MasterNodeコネクション無操作タイムアウト時間(単位は秒). デフォルト:43200 (12時間)
 #
 # -KS [byte] saveKeyMaxSize
@@ -73,7 +85,7 @@ datanode:
 #          全てのアドレスに届かない場合に自動的にMasterNodeがshutdownする.
 #          無指定の場合は孤立判定しない. デフォルト:未指定
 #
-############################################################################### 
+###############################################################################
 #  DataNode
 #
 # -ts [byte] tagValueAppendMaxSize
@@ -103,11 +115,11 @@ datanode:
 #          データファイルをOSのPageCacheにのせる件数. デフォルト:100000
 #
 # -udt [n] useDiskType
-#          okuyamaが利用するディスクの種類 1=HDD,2=SSD  デフォルト:1 
+#          okuyamaが利用するディスクの種類 1=HDD,2=SSD  デフォルト:1
 #
 # -mdcs [n] maxDiskCacheSize
 #          高速なDiskを読み出しキャッシュに利用する場合の最大キャッシュ数
-#          (ここでの定義数 × dataFileWriteMaxSize=ディスク上に作成される最大サイズ(バイト/単位)). 
+#          (ここでの定義数 × dataFileWriteMaxSize=ディスク上に作成される最大サイズ(バイト/単位)).
 #          デフォルト:10000
 #
 # -fbmnk [n] fileBaseMapNumberOfOneFileKey
@@ -147,7 +159,7 @@ datanode:
 # -csf [true|false] calcSizeFlg
 #        保存データサイズの合計値演算設定 true:計算する  false:計算しない
 #        デフォルト:true
-# 
+#
 # -rdvp [true|false] reuseDataFileValuePositionFlg
 #         完全ファイルモード時に既に登録されているKeyの更新の場合にファイル上のValueの場所を再利用するかの設定。
 #         再利用しない場合は、新規、更新ともに処理速度を向上させることが可能。正し同一のKeyを書き換え続けた場合に
